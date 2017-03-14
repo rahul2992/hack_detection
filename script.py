@@ -60,8 +60,40 @@ ip_recv_f1 = pd.Series(ip_recv_f1)
 data = pd.concat([data, ip_recv_l1, ip_recv_l2, ip_recv_f1], axis = 1)
 data = data.rename( columns = {0: 'ip_l1', 1: 'ip_l2', 2: 'ip_f1'})
 data = data.drop('destination_ip', axis = 1)
-print data.tail(10)
+data = data.drop('flags', axis = 1)
+data = data.drop('site', axis = 1)
+data = data.drop('asn', axis = 1)
 
+#Create a dataframe for every receiver, with columns source, number of attempts, 
+#average size of packet, average time difference between attempts, and avg. bytes
+ 
+#Find number of sub regions in the data set
+receivers = data.groupby('ip_f1').groups
+
+#print data.head(20)
+
+i = 0
+src, packets, bytes, st_time, stopper = [], [], [], [], []
+for rec in receivers:
+	indexlist = receivers[rec]
+	stopper.append(i)
+	i = 0
+	for index in indexlist:
+		src_tmp = data['source_ip'].iloc[index]
+		packets_tmp = data['num_packets'].iloc[index]
+		bytes_tmp = data['num_bytes'].iloc[index]
+		st_time_tmp = data['start_time'].iloc[index]
+		
+		src.append(src_tmp)
+		packets.append(packets_tmp)
+		bytes.append(bytes_tmp)
+		st_time.append(st_time_tmp)
+		
+		i += 1
+		
+		
+		
+	
 
 
 
