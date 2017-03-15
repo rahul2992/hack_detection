@@ -4,6 +4,7 @@ import datetime
 import matplotlib.pyplot as plt
 import re
 from sklearn.cluster import KMeans
+from sklearn import preprocessing
 
 def intertime(time_list):
 	num = len(time_list)
@@ -194,12 +195,13 @@ plt.show()
 source_ip = features['source_ip'].values
 features = features.drop('source_ip', axis = 1)
 features = np.asarray(features, dtype = 'int')
+features_scaled = preprocessing.scale(features)
 
 print 'Creating classifier'
-kmeans = KMeans(n_clusters = 2, random_state = 0)
+kmeans = KMeans(n_clusters = 2, n_init = 100)
 
 print 'fitting KMeans classifier...'
-clusters = kmeans.fit(features)
+clusters = kmeans.fit(features_scaled)
 
 labels = clusters.labels_
 results = pd.DataFrame({'source_ip': source_ip, 'labels': labels})
