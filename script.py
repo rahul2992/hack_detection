@@ -3,6 +3,7 @@ import numpy as np
 import datetime
 import matplotlib.pyplot as plt
 import re
+from sklearn.cluster import KMeans
 
 def intertime(time_list):
 	num = len(time_list)
@@ -189,6 +190,22 @@ plt.show()
 attempts = features['avg_intertime'].values
 plt.hist(attempts, bins = 100, range = (1000, 5000), alpha = 0.8)
 plt.show()
+
+source_ip = features['source_ip'].values
+features = features.drop('source_ip', axis = 1)
+features = np.asarray(features, dtype = 'int')
+
+print 'Creating classifier'
+kmeans = KMeans(n_clusters = 2, random_state = 0)
+
+print 'fitting KMeans classifier...'
+clusters = kmeans.fit(features)
+
+labels = clusters.labels_
+results = pd.DataFrame({'source_ip': source_ip, 'labels': labels})
+print results
+
+
 
 
 				
