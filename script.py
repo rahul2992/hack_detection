@@ -4,18 +4,28 @@ import datetime
 import matplotlib.pyplot as plt
 import re
 
+def intertime(time_list):
+	num = len(time_list)
+	diff = []
+	#print time_list
+	for i in xrange(0, len(time_list) - 1):
+		tmp = time_list[i+1] - time_list[i]
+		diff.append(tmp)
+	avg_inter_time = sum(diff)/num
+	return avg_inter_time
+
 file = 'ds_1_with_fields.csv'
 
 data = pd.read_csv(file)
 
-start_time = []
-for time in data['start_time']:
-	t = datetime.datetime.fromtimestamp(time/1e3).strftime('%Y-%m-%d %H:%M:%S')
-	start_time.append(t)
-start_time = pd.Series(start_time)
-data = pd.concat([data, start_time], axis = 1)
-data = data.drop('start_time', axis = 1)
-data = data.rename(columns = {0: 'start_time'})
+#start_time = []
+#for time in data['start_time']:
+	#t = datetime.datetime.fromtimestamp(time/1e3)
+	#start_time.append(t)
+#start_time = pd.Series(start_time)
+#data = pd.concat([data, start_time], axis = 1)
+#data = data.drop('start_time', axis = 1)
+#data = data.rename(columns = {0: 'start_time'})
 
 
 num_sourceip = data['source_ip'].value_counts()
@@ -91,9 +101,80 @@ for rec in receivers:
 		
 		i += 1
 		
-		
-		
+dataset = pd.DataFrame({'source_ip': src, 'num_packets': packets, 'num_bytes': bytes,
+						'start_time': st_time})
+						
+#print dataset.head(20)		
+
+tmp_mov = 0
+stopper_mov = []
+num_recs = len(stopper)
+for j in xrange(0, num_recs):
+	tmp_mov = sum(stopper[0:j+1])
+	stopper_mov.append(tmp_mov)
+test, test2 = [], []
+lprev = 1
+s_packets, s_num_attempts, s_source, s_avg_packets, s_bytes, s_avg_bytes, time_lst, s_avg_intertime = [], [], [], [], [], [], [], []
+for j in xrange(0, len(stopper_mov)-1):
+	split = stopper_mov[j]
+	split_u = stopper_mov[j+1]
+	#print 'split', split
+	#print 'split_u', split_u
+	recv_tmp = dataset.iloc[split:split_u, :]
+	recv_source = recv_tmp.groupby('source_ip').groups
+	#print 'recv:', recv_source
 	
+	#Creating the feature matrix
+	for src, index_lst in recv_source.iteritems():
+		#Number of attempts by each receiver
+		#print 'source:', src
+		num_attempts_tmp = len(index_lst)
+		s_num_attempts.append(num_attempts_tmp)
+		s_source.append(src)
+		#test2.append(src)
+		for index in index_lst:
+			#Avg. number of packets by source
+			s_packets_tmp = dataset['num_packets'].iloc[index]
+			s_packets.append(s_packets_tmp)
+			#Avg. number of bytes by source
+			s_bytes_tmp = dataset['num_bytes'].iloc[index]
+			s_bytes.append(s_bytes_tmp)
+			
+			#time intervals
+			time = data['start_time'].iloc[index]
+			time_lst.append(time)
+			#print time
+			
+			#Count to find average
+			lprev = len(index_lst)
+			
+			if (index == index_lst[len(index_lst) - 1]):
+				#packets
+				#test.append(index)
+				avg_packets = sum(s_packets)/lprev
+				s_avg_packets.append(avg_packets)
+				avg_packets = []
+		
+				#bytes
+				avg_bytes = sum(s_bytes)/lprev
+				s_avg_bytes.append(avg_bytes)
+				avg_bytes = []
+				
+				#Time 
+				#print len(time_lst)
+				time_sorted = sorted(time_lst)
+				#print 'sorted', len(time_lst)
+				avg_intertime = intertime(time_sorted)
+				s_avg_intertime.append(avg_intertime)
+				time_lst = []
+				
+
+				
+				
+#print len(test)
+#print len(test2)
 
 
+				
 
+		
