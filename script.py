@@ -153,12 +153,12 @@ for j in xrange(0, len(stopper_mov)-1):
 				#test.append(index)
 				avg_packets = sum(s_packets)/lprev
 				s_avg_packets.append(avg_packets)
-				avg_packets = []
+				s_packets = []
 		
 				#bytes
 				avg_bytes = sum(s_bytes)/lprev
 				s_avg_bytes.append(avg_bytes)
-				avg_bytes = []
+				s_bytes = []
 				
 				#Time 
 				#print len(time_lst)
@@ -168,11 +168,27 @@ for j in xrange(0, len(stopper_mov)-1):
 				s_avg_intertime.append(avg_intertime)
 				time_lst = []
 				
+print 'source', len(s_source)
+print 'num_attempts', len(s_num_attempts)
+print 'packet', len(s_avg_packets)
+print 'bytes', len(s_avg_bytes)
+print 'time', len(s_avg_intertime)
 
-				
-				
-#print len(test)
-#print len(test2)
+features = pd.DataFrame({'source_ip': s_source, 'num_attempts': s_num_attempts,
+						 'avg_num_packets': s_avg_packets, 'avg_num_bytes': s_avg_bytes,
+						 'avg_intertime': s_avg_intertime})
+						 
+attempts = features['num_attempts'].values
+plt.hist(attempts, bins = 100, range = (0, 1000), alpha = 0.8)
+plt.show()
+
+packets = features['avg_num_packets'].values
+plt.hist(attempts, bins = 100, range = (0, 200), alpha = 0.8)
+plt.show()
+
+attempts = features['avg_intertime'].values
+plt.hist(attempts, bins = 100, range = (1000, 5000), alpha = 0.8)
+plt.show()
 
 
 				
